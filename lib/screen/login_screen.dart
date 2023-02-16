@@ -1,5 +1,12 @@
+// ignore_for_file: constant_identifier_names
+
+import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+enum Gender{
+  Male,
+  Female
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -14,11 +21,13 @@ bool isSwitched = true;
 class _LoginScreenState extends State<LoginScreen> {
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-  final genderController = TextEditingController();
+  final gendercontroller = TextEditingController();
   final ageController = TextEditingController();
   final locationController = TextEditingController();
+  Gender gender = Gender.Male;
   bool enableEdit = false;
   bool isShow = true;
+  String selectedDate = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,11 +143,43 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(
                     height: 30,
                   ),
-                  customTextField('Full Name', 'Dor Alex',nameController),
-                  customTextField('Phone Number', '+91727771548',phoneController),
-                  customTextField('Gender', 'Male',genderController),
-                  customTextField('Age', '24',ageController),
-                  customTextField('Location', 'New Town',locationController),
+                  customTextField('Full Name', 'Dor Alex',nameController,(){}),
+                  customTextField('Phone Number', '+91727771548',phoneController,(){}),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  const Text(
+                    'Gender',
+                    style:  TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.bold, color: Colors.grey),
+                  ),
+                  SizedBox(
+                    height: 65,
+                    width: MediaQuery.of(context).size.width,
+                    child: DropdownButton<Gender>(
+                      isExpanded:true,
+                      underline: Divider(
+                        thickness: 0.9,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                        value: gender,
+                        onChanged: (Gender? newValue) {
+                          setState(() {
+                            gender = newValue!;
+                            print(gender!.name.toString());
+                          });
+                        },
+                        items: Gender.values.map((Gender classType) {
+                          return DropdownMenuItem<Gender>(
+                              value: classType,
+                              child: Text(classType.name.toString()));
+                        }).toList()
+                    ),
+                  ),
+                  customTextField('Age', '24',ageController,(){
+                    _selectDate(context);
+                  }),
+                  customTextField('Location', 'New Town',locationController,(){}),
                   const SizedBox(
                     height: 20,
                   ),
@@ -214,44 +255,50 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget support(String title, void Function()? onPressed) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 20,
-            ))
-      ],
+    return InkWell(
+      onTap: () {},
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 20,
+              ))
+        ],
+      ),
     );
   }
 
   Widget security(String title, void Function()? onPressed) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 20,
-            ))
-      ],
+    return InkWell(
+      onTap: () {},
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 20,
+              ))
+        ],
+      ),
     );
   }
 
-  Widget customTextField(String title, String text,dynamic mycontroller) {
+  Widget customTextField(String title, String text,dynamic mycontroller,void Function()? onPressed) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,6 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
               fontSize: 17, fontWeight: FontWeight.bold, color: Colors.grey),
         ),
         TextField(
+          onTap: onPressed,
           controller: mycontroller,
           readOnly: enableEdit,
           decoration: InputDecoration(
@@ -272,6 +320,27 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
+  }
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1990, 1),
+        lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        final birthdayYear = picked.year;
+        final date2Year = DateTime.now().year;
+        int year = date2Year - birthdayYear;
+
+        final birthdayMonth = picked.month;
+        final date2Month = DateTime.now().month;
+        int month = date2Month - birthdayMonth;
+        selectedDate = "$year years $month months";
+        ageController.text = selectedDate;
+      });
+    }
   }
 }
 
@@ -400,4 +469,6 @@ class CustomButton extends StatelessWidget{
     );
 
   }}
+
+
 
