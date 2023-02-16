@@ -1,6 +1,4 @@
-// ignore_for_file: constant_identifier_names
 
-import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 enum Gender{
@@ -333,11 +331,12 @@ class _LoginScreenState extends State<LoginScreen> {
         final birthdayYear = picked.year;
         final date2Year = DateTime.now().year;
         int year = date2Year - birthdayYear;
+        selectedDate = "$year";
 
-        final birthdayMonth = picked.month;
-        final date2Month = DateTime.now().month;
-        int month = date2Month - birthdayMonth;
-        selectedDate = "$year years $month months";
+        // final birthdayMonth = picked.month;
+        // final date2Month = DateTime.now().month;
+        // int month = date2Month - birthdayMonth;
+        // selectedDate = "$year years $month months";
         ageController.text = selectedDate;
       });
     }
