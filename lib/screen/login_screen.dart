@@ -72,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: const EdgeInsets.only(left: 18, right: 18, top: 5),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child:
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,27 +152,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     style:  TextStyle(
                         fontSize: 17, fontWeight: FontWeight.bold, color: Colors.grey),
                   ),
-                  SizedBox(
-                    height: 65,
-                    width: MediaQuery.of(context).size.width,
-                    child: DropdownButton<Gender>(
-                      isExpanded:true,
-                      underline: Divider(
-                        thickness: 0.9,
-                        color: Colors.black.withOpacity(0.5),
+                  TextFormField(
+                    controller: gendercontroller,
+                    decoration: InputDecoration(
+                      suffixIcon: DropdownButton<Gender>(
+                       underline: const Divider(
+                         color: Colors.white,
+                       ),
+                          isExpanded:true,
+                          value: gender,
+                          onChanged: (Gender? newValue) {
+                            setState(() {
+                              gender = newValue!;
+                            });
+                          },
+                          items: Gender.values.map((Gender classType) {
+                            return DropdownMenuItem<Gender>(
+                                value: classType,
+                                child: Text(classType.name.toString()));
+                          }).toList()
                       ),
-                        value: gender,
-                        onChanged: (Gender? newValue) {
-                          setState(() {
-                            gender = newValue!;
-                          });
-                        },
-                        items: Gender.values.map((Gender classType) {
-                          return DropdownMenuItem<Gender>(
-                              value: classType,
-                              child: Text(classType.name.toString()));
-                        }).toList()
                     ),
+                  ),
+                  const SizedBox(
+                    height: 20,
                   ),
                   customTextField('Age', '24',ageController,(){
                     _selectDate(context);
@@ -251,6 +255,27 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+///-------------------Function to open calender and calculate age---------------------///
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1990, 1),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        final birthdayYear = picked.year;
+        final date2Year = DateTime.now().year;
+        int year = date2Year - birthdayYear;
+        selectedDate = "$year years";
+        ageController.text = selectedDate;
+
+      });
+    }
+  }
+
   Widget support(String title, void Function()? onPressed) {
     return InkWell(
       onTap: () {},
@@ -318,24 +343,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(1990, 1),
-        lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        final birthdayYear = picked.year;
-        final date2Year = DateTime.now().year;
-        int year = date2Year - birthdayYear;
-        selectedDate = "$year years";
-        ageController.text = selectedDate;
 
-      });
-    }
-  }
 }
 
 class CustomHeading extends StatelessWidget {
