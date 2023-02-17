@@ -164,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         onChanged: (Gender? newValue) {
                           setState(() {
                             gender = newValue!;
-                            print(gender!.name.toString());
                           });
                         },
                         items: Gender.values.map((Gender classType) {
@@ -331,13 +330,9 @@ class _LoginScreenState extends State<LoginScreen> {
         final birthdayYear = picked.year;
         final date2Year = DateTime.now().year;
         int year = date2Year - birthdayYear;
-        selectedDate = "$year";
-
-        // final birthdayMonth = picked.month;
-        // final date2Month = DateTime.now().month;
-        // int month = date2Month - birthdayMonth;
-        // selectedDate = "$year years $month months";
+        selectedDate = "$year years";
         ageController.text = selectedDate;
+
       });
     }
   }
