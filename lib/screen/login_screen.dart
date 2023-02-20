@@ -1,6 +1,16 @@
 
+
+// ignore_for_file: constant_identifier_names
+
+
+
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter/services.dart';
+
+import 'package:image_picker/image_picker.dart';
 enum Gender{
   Male,
   Female
@@ -14,24 +24,32 @@ class LoginScreen extends StatefulWidget {
 }
 
 bool isSwitchOn = true;
-bool isSwitched = true;
+bool isSwitched = false;
+bool isEnabled = false;
 
 class _LoginScreenState extends State<LoginScreen> {
+
+
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final gendercontroller = TextEditingController();
   final ageController = TextEditingController();
   final locationController = TextEditingController();
+
+
   Gender gender = Gender.Male;
   bool enableEdit = false;
   bool isShow = true;
   String selectedDate = "";
+  File? uploadImage;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: enableEdit
           ? Padding(
               padding: const EdgeInsets.all(20),
+
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: const [
@@ -50,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             )
           : null,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         actions: [
           Padding(
@@ -110,10 +128,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                   )
                             ],
                           ),
-                          child: const CircleAvatar(
-                            radius: 50,
-                            backgroundImage:
-                                AssetImage('assets/images/emmanda.png',),
+                          child:  Container(
+                            clipBehavior: Clip.antiAliasWithSaveLayer,
+                            height: 100,
+                            width: 120,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle
+                            ),
+                            child: uploadImage == null
+                                ? Image.asset('assets/images/emmanda.png') // set a placeholder image when no photo is set
+                                : Image.file(uploadImage!,fit: BoxFit.cover,),
                           ),
                         ),
                         Positioned(
@@ -125,7 +149,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 shape: BoxShape.circle,
                               ),
                               child: InkWell(
-                                onTap: () {},
+                                onTap: () {
+                                  _modalBottomSheetMenu();
+
+                                },
                                 child: const CircleAvatar(
                                   backgroundColor: Colors.green,
                                   child: Icon(
@@ -254,6 +281,77 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  void _modalBottomSheetMenu(){
+    showModalBottomSheet(
+        context: context,
+        builder: (builder){
+          return  Container(
+            height: 150.0,
+            color: Colors.transparent, //could change this to Color(0xFF737373),
+            //so you don't have to change MaterialApp canvasColor
+            child:  Container(
+                decoration:  const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:  BorderRadius.only(
+                        topLeft: Radius.circular(30.0),
+                        topRight: Radius.circular(30.0))),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          pickImage(source:ImageSource.gallery);
+                          Navigator.pop(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: const [
+                            Icon(Icons.image_outlined),
+                            Text("Pick Gallery"),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          pickImage(source: ImageSource.camera);
+                          Navigator.pop(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: const [
+                            Icon(Icons.camera_alt_outlined),
+                            Text("Pick Camera"),
+                          ],
+                        )),
+                  ),
+                ],
+              ),
+              ),
+          );
+        }
+    );
+  }
+
+
+
+  Future pickImage( {required ImageSource source}) async {
+    try {
+      final image = await ImagePicker().pickImage(source: source);
+      if(image == null) return;
+      setState(() {
+        uploadImage = File(image.path);
+      });
+    } on PlatformException catch(e) {
+      print('Failed to pick image: $e');
+    }
+  }
+
+
+
 
 ///-------------------Function to open calender and calculate age---------------------///
 
@@ -387,6 +485,34 @@ class CustomNotification extends StatefulWidget {
 }
 
 class _CustomNotificationState extends State<CustomNotification> {
+  void toggleSwitch(bool value) {
+    if(isSwitched == false)
+    {
+      setState(() {
+        isSwitched = true;
+      });
+    }
+    else
+    {
+      setState(() {
+        isSwitched = false;
+      });
+    }
+  }
+  void toggleMaterial(bool value) {
+    if(isEnabled == false)
+    {
+      setState(() {
+        isEnabled = true;
+      });
+    }
+    else
+    {
+      setState(() {
+        isEnabled = false;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -405,17 +531,13 @@ class _CustomNotificationState extends State<CustomNotification> {
               widget.subTitle1,
               style: TextStyle(fontSize: 17, color: Colors.grey.withOpacity(1)),
             ),
-            FlutterSwitch(
-              value: isSwitchOn,
-              activeColor: Colors.green,
-              height: 25,
-              width: 45,
-              onToggle: (value) {
-                setState(() {
-                  isSwitchOn = value;
-                });
-              },
-            ),
+            Switch(
+              onChanged: toggleMaterial,
+              value: isEnabled,
+              activeColor: Colors.white,
+              activeTrackColor: Colors.green,
+              inactiveThumbColor: Colors.redAccent,
+              inactiveTrackColor: Colors.black,)
           ],
         ),
         const SizedBox(
@@ -428,17 +550,13 @@ class _CustomNotificationState extends State<CustomNotification> {
               widget.subTitle2,
               style: TextStyle(fontSize: 17, color: Colors.grey.withOpacity(1)),
             ),
-            FlutterSwitch(
+            Switch(
+              onChanged: toggleSwitch,
               value: isSwitched,
-              activeColor: Colors.green,
-              height: 25,
-              width: 45,
-              onToggle: (value) {
-                setState(() {
-                  isSwitched = value;
-                });
-              },
-            ),
+              activeColor: Colors.white,
+              activeTrackColor: Colors.green,
+              inactiveThumbColor: Colors.redAccent,
+              inactiveTrackColor: Colors.black,)
           ],
         ),
       ],
